@@ -158,7 +158,7 @@ function Navbar({ scrolled }: { scrolled: boolean }) {
   const [hov,setHov]=useState<string|null>(null)
   const [open,setOpen]=useState(false)
   const isMobile=useIsMobile()
-  const onDark = !scrolled
+  const onDark = true
 
   return (
     <nav style={{
@@ -218,376 +218,99 @@ function Navbar({ scrolled }: { scrolled: boolean }) {
   )
 }
 
-// ── ORGANIC MOLECULAR CANVAS (right-hero visual) ─────────────────────────────
-
-function OrganicCanvas() {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const rafRef    = useRef<number>(0)
-
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-
-    let W = canvas.offsetWidth, H = canvas.offsetHeight
-    canvas.width = W; canvas.height = H
-
-    const onResize = () => { W = canvas.offsetWidth; H = canvas.offsetHeight; canvas.width = W; canvas.height = H }
-    window.addEventListener('resize', onResize)
-
-    // Protein-like clusters floating around a large "cell" blob
-    type Protein = { x:number; y:number; vx:number; vy:number; r:number; col:string; phase:number }
-    const COLS = ['#e879f9','#f97316','#fb7185','#a78bfa','#4ade80','#facc15','#38bdf8']
-
-    const proteins: Protein[] = Array.from({ length: 28 }, (_, i) => ({
-      x: W * (.15 + Math.random() * .7),
-      y: H * (.1  + Math.random() * .8),
-      vx: (Math.random() - .5) * .35,
-      vy: (Math.random() - .5) * .28,
-      r: 14 + Math.random() * 34,
-      col: COLS[i % COLS.length],
-      phase: Math.random() * Math.PI * 2,
-    }))
-
-    // Connector lines (simulate biological network)
-    const links: [number,number][] = []
-    for (let i=0;i<proteins.length;i++) for (let j=i+1;j<proteins.length;j++) {
-      if (links.length < 40 && Math.random() < .18) links.push([i,j])
-    }
-
-    let t = 0
-    const tick = () => {
-      t += .006
-      ctx.clearRect(0, 0, W, H)
-
-      // Background
-      ctx.fillStyle = '#080614'
-      ctx.fillRect(0, 0, W, H)
-
-      // Large central "cell" blob — purple glow
-      const cx = W * .52, cy = H * .48
-      for (const [scale, alpha] of [[2.2, .08],[1.6,.14],[1.1,.2],[.7,.32],[.4,.45]] as [number,number][]) {
-        const blobR = Math.min(W,H) * .32 * scale
-        const blob = ctx.createRadialGradient(cx, cy, 0, cx, cy, blobR)
-        blob.addColorStop(0, `rgba(160,80,255,${alpha})`)
-        blob.addColorStop(.5,`rgba(100,40,180,${alpha*.6})`)
-        blob.addColorStop(1, `rgba(60,0,120,0)`)
-        ctx.fillStyle = blob; ctx.beginPath(); ctx.arc(cx, cy, blobR, 0, Math.PI*2); ctx.fill()
-      }
-      // Cell surface texture (overlapping ellipses)
-      ctx.save(); ctx.globalAlpha = .22
-      for (let i=0;i<8;i++) {
-        const a = (i/8)*Math.PI*2+t*.08
-        const ex = cx + Math.cos(a) * W*.14, ey = cy + Math.sin(a) * H*.18
-        const g = ctx.createRadialGradient(ex,ey,0,ex,ey,W*.1)
-        g.addColorStop(0,'rgba(200,100,255,.5)'); g.addColorStop(1,'rgba(120,40,200,0)')
-        ctx.fillStyle=g; ctx.beginPath(); ctx.arc(ex,ey,W*.1,0,Math.PI*2); ctx.fill()
-      }
-      ctx.restore()
-
-      // Network connections
-      for (const [a,b] of links) {
-        const pa=proteins[a], pb=proteins[b]
-        const dx=pb.x-pa.x, dy=pb.y-pa.y, dist=Math.sqrt(dx*dx+dy*dy)
-        if (dist > W*.55) continue
-        const alpha = Math.max(0, .45 - dist/(W*.55)) * (.5+Math.sin(t*1.2+pa.phase)*.2)
-        const grad = ctx.createLinearGradient(pa.x,pa.y,pb.x,pb.y)
-        grad.addColorStop(0,`${pa.col}${Math.round(alpha*255).toString(16).padStart(2,'0')}`)
-        grad.addColorStop(1,`${pb.col}${Math.round(alpha*255).toString(16).padStart(2,'0')}`)
-        ctx.beginPath(); ctx.moveTo(pa.x,pa.y); ctx.lineTo(pb.x,pb.y)
-        ctx.strokeStyle=grad; ctx.lineWidth=.8; ctx.stroke()
-      }
-
-      // Protein clusters — organic flower-like shapes
-      for (const p of proteins) {
-        p.x += p.vx + Math.sin(t*.6+p.phase)*.15
-        p.y += p.vy + Math.cos(t*.5+p.phase)*.15
-        // bounce
-        if (p.x < p.r) p.vx = Math.abs(p.vx)
-        if (p.x > W-p.r) p.vx = -Math.abs(p.vx)
-        if (p.y < p.r) p.vy = Math.abs(p.vy)
-        if (p.y > H-p.r) p.vy = -Math.abs(p.vy)
-        p.vx *= .998; p.vy *= .998
-
-        const pulse = .85 + Math.sin(t*1.4+p.phase)*.15
-        const rr = p.r * pulse
-
-        // Glow halo
-        const glo = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,rr*2.8)
-        const hex = p.col.replace('#','')
-        const r0=parseInt(hex.slice(0,2),16), g0=parseInt(hex.slice(2,4),16), b0=parseInt(hex.slice(4,6),16)
-        glo.addColorStop(0, `rgba(${r0},${g0},${b0},.28)`)
-        glo.addColorStop(1, `rgba(${r0},${g0},${b0},0)`)
-        ctx.beginPath(); ctx.arc(p.x,p.y,rr*2.8,0,Math.PI*2); ctx.fillStyle=glo; ctx.fill()
-
-        // Petal lobes (protein-like flower shape)
-        const nPetals = 4 + (p.r>30?2:0)
-        for (let i=0;i<nPetals;i++) {
-          const a = (i/nPetals)*Math.PI*2 + t*.25+p.phase
-          const px = p.x+Math.cos(a)*rr*.72, py = p.y+Math.sin(a)*rr*.72
-          const pg = ctx.createRadialGradient(px,py,0,px,py,rr*.68)
-          pg.addColorStop(0,`rgba(${r0},${g0},${b0},.9)`)
-          pg.addColorStop(.5,`rgba(${r0},${g0},${b0},.45)`)
-          pg.addColorStop(1,`rgba(${r0},${g0},${b0},0)`)
-          ctx.beginPath(); ctx.arc(px,py,rr*.68,0,Math.PI*2); ctx.fillStyle=pg; ctx.fill()
-        }
-        // Core
-        ctx.beginPath(); ctx.arc(p.x,p.y,rr*.38,0,Math.PI*2)
-        ctx.fillStyle=`rgba(${r0},${g0},${b0},.95)`; ctx.fill()
-        ctx.beginPath(); ctx.arc(p.x,p.y,rr*.18,0,Math.PI*2)
-        ctx.fillStyle='rgba(255,255,255,.45)'; ctx.fill()
-      }
-
-      // Top-right corner accent glow
-      const corner = ctx.createRadialGradient(W,0,0,W,0,W*.45)
-      corner.addColorStop(0,'rgba(232,121,249,.12)'); corner.addColorStop(1,'rgba(0,0,0,0)')
-      ctx.fillStyle=corner; ctx.fillRect(0,0,W,H)
-
-      rafRef.current = requestAnimationFrame(tick)
-    }
-
-    tick()
-    return () => { cancelAnimationFrame(rafRef.current); window.removeEventListener('resize', onResize) }
-  }, [])
-
-  return <canvas ref={canvasRef} style={{ position:'absolute', inset:0, width:'100%', height:'100%' }} aria-hidden="true" />
-}
-
-// ── DNA HELIX CANVAS ─────────────────────────────────────────────────────────
-
-function DNACanvas() {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const rafRef    = useRef<number>(0)
-
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-
-    let W = canvas.offsetWidth, H = canvas.offsetHeight
-    canvas.width = W; canvas.height = H
-
-    const onResize = () => {
-      W = canvas.offsetWidth; H = canvas.offsetHeight
-      canvas.width = W; canvas.height = H
-    }
-    window.addEventListener('resize', onResize)
-
-    // Floating micro-particles
-    const particles = Array.from({ length: 80 }, () => ({
-      x: Math.random() * 1, y: Math.random(),
-      r: Math.random() * 1.2 + 0.3,
-      speed: Math.random() * 0.00035 + 0.00012,
-      drift: (Math.random() - 0.5) * 0.0003,
-      opacity: Math.random() * 0.35 + 0.08,
-    }))
-
-    let t = 0
-    const tick = () => {
-      t += 0.008
-      ctx.clearRect(0, 0, W, H)
-
-      // Deep dark bg
-      ctx.fillStyle = '#050b14'
-      ctx.fillRect(0, 0, W, H)
-
-      // Central radial glow
-      const bg = ctx.createRadialGradient(W * .5, H * .45, 0, W * .5, H * .45, W * .55)
-      bg.addColorStop(0, 'rgba(0,50,80,.45)')
-      bg.addColorStop(1, 'rgba(0,0,0,0)')
-      ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H)
-
-      // Floating particles
-      for (const p of particles) {
-        p.y -= p.speed; p.x += p.drift
-        if (p.y < -0.02) p.y = 1.02
-        if (p.x < -0.02) p.x = 1.02
-        if (p.x >  1.02) p.x = -0.02
-        ctx.beginPath()
-        ctx.arc(p.x * W, p.y * H, p.r, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(100,210,240,${p.opacity})`
-        ctx.fill()
-      }
-
-      // Helper: draw one DNA double-helix
-      const drawHelix = (cx: number, radius: number, nBases: number, phase: number) => {
-        const top = -H * .08, bot = H * 1.08
-        const step = (bot - top) / nBases
-        const turns = 4.5
-
-        const s1: { x:number; y:number; z:number }[] = []
-        const s2: { x:number; y:number; z:number }[] = []
-
-        for (let i = 0; i < nBases; i++) {
-          const y = top + i * step
-          const a = phase + (i / nBases) * Math.PI * 2 * turns
-          s1.push({ x: cx + Math.sin(a) * radius,           y, z: Math.cos(a) })
-          s2.push({ x: cx + Math.sin(a + Math.PI) * radius, y, z: Math.cos(a + Math.PI) })
-        }
-
-        // Strand path helper
-        const drawStrand = (nodes: typeof s1, r: number, g: number, b: number) => {
-          ctx.beginPath()
-          nodes.forEach((n, i) => {
-            if (i === 0) { ctx.moveTo(n.x, n.y); return }
-            const p = nodes[i-1]
-            ctx.quadraticCurveTo(p.x, p.y, (p.x+n.x)/2, (p.y+n.y)/2)
-          })
-          const gr = ctx.createLinearGradient(0, top, 0, bot)
-          gr.addColorStop(0,   `rgba(${r},${g},${b},0)`)
-          gr.addColorStop(.1,  `rgba(${r},${g},${b},.65)`)
-          gr.addColorStop(.9,  `rgba(${r},${g},${b},.65)`)
-          gr.addColorStop(1,   `rgba(${r},${g},${b},0)`)
-          ctx.strokeStyle = gr
-          ctx.lineWidth = Math.max(1.2, radius * 0.03)
-          ctx.stroke()
-        }
-
-        drawStrand(s1, 56, 189, 248)  // cyan-blue
-        drawStrand(s2, 74, 222, 128)  // green
-
-        // Base pair rungs every 2 nodes
-        for (let i = 0; i < nBases; i += 2) {
-          const a = (s1[i].z + 1) / 2
-          ctx.beginPath()
-          ctx.moveTo(s1[i].x, s1[i].y)
-          ctx.lineTo(s2[i].x, s2[i].y)
-          ctx.strokeStyle = `rgba(147,220,230,${.06 + a * .28})`
-          ctx.lineWidth = Math.max(.5, radius * 0.014)
-          ctx.stroke()
-        }
-
-        // Glowing nodes on both strands
-        const drawNodes = (nodes: typeof s1, r: number, g: number, b: number) => {
-          for (const n of nodes) {
-            const depth = (n.z + 1) / 2
-            const nr = Math.max(1.5, radius * .058 * (.5 + depth * .5))
-            const glo = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, nr * 4.5)
-            glo.addColorStop(0, `rgba(${r},${g},${b},${.3 + depth * .4})`)
-            glo.addColorStop(1, `rgba(${r},${g},${b},0)`)
-            ctx.beginPath(); ctx.arc(n.x, n.y, nr * 4.5, 0, Math.PI * 2)
-            ctx.fillStyle = glo; ctx.fill()
-            ctx.beginPath(); ctx.arc(n.x, n.y, nr, 0, Math.PI * 2)
-            ctx.fillStyle = `rgba(${r},${g},${b},${.75 + depth * .25})`; ctx.fill()
-          }
-        }
-
-        drawNodes(s1, 56, 189, 248)
-        drawNodes(s2, 74, 222, 128)
-      }
-
-      // Draw helices: one large centred, two flanking on desktop
-      const mainR = Math.min(W * .07, 96)
-      drawHelix(W * .5, mainR, 48, t)
-      if (W > 768) {
-        drawHelix(W * .16, Math.min(W * .038, 52), 34, t * .75 + 1.4)
-        drawHelix(W * .84, Math.min(W * .038, 52), 34, t * .88 + 0.7)
-      }
-
-      rafRef.current = requestAnimationFrame(tick)
-    }
-
-    tick()
-    return () => { cancelAnimationFrame(rafRef.current); window.removeEventListener('resize', onResize) }
-  }, [])
-
-  return <canvas ref={canvasRef} style={{ position:'absolute', inset:0, width:'100%', height:'100%' }} aria-hidden="true" />
-}
-
-// ── HERO ─────────────────────────────────────────────────────────────────────
+// ── HERO — CINEMATIC VIDEO ────────────────────────────────────────────────────
 
 function Hero() {
   const [loaded,setLoaded]=useState(false)
   const isMobile=useIsMobile()
-
-  useEffect(()=>{ const t=setTimeout(()=>setLoaded(true),100); return ()=>clearTimeout(t) },[])
-
+  useEffect(()=>{ const t=setTimeout(()=>setLoaded(true),80); return ()=>clearTimeout(t) },[])
   const fade=(d:number):React.CSSProperties=>({
-    opacity:loaded?1:0, transform:loaded?'none':'translateY(24px)',
-    transition:`all 1.1s cubic-bezier(.16,1,.3,1) ${d}s`,
+    opacity:loaded?1:0, transform:loaded?'none':'translateY(28px)',
+    transition:`all 1.2s cubic-bezier(.16,1,.3,1) ${d}s`,
   })
 
   return (
-    <section id="hero" style={{ position:'relative', height:'100vh', minHeight:isMobile?620:700, overflow:'hidden', background:'#080614', display:'flex', flexDirection:isMobile?'column':'row' }}>
+    <section id="hero" style={{ position:'relative', height:'100vh', minHeight:isMobile?620:700, overflow:'hidden', background:'#080614' }}>
 
-      {/* ── LEFT: text ────────────────────────────── */}
-      <div style={{ position:'relative', flex:isMobile?'none':'0 0 50%', zIndex:3, display:'flex', flexDirection:'column', justifyContent:'center', padding:isMobile?'7rem 1.6rem 3rem':'0 4.5rem 0 5.5rem' }}>
+      {/* ── Full-screen video ── */}
+      <video autoPlay muted loop playsInline
+        style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', zIndex:0 }}
+      >
+        <source src="/287263.mp4" type="video/mp4" />
+      </video>
 
-        {/* DNA canvas ambiance (left only, faint) */}
-        <div style={{ position:'absolute', inset:0, opacity:0.18, pointerEvents:'none' }}>
-          <DNACanvas />
-        </div>
+      {/* ── Cinematic gradient: dense dark on left, fades to reveal video on right ── */}
+      <div style={{ position:'absolute', inset:0, background:'linear-gradient(108deg, rgba(8,6,20,0.96) 0%, rgba(8,6,20,0.85) 30%, rgba(8,6,20,0.55) 58%, rgba(8,6,20,0.18) 100%)', zIndex:1, pointerEvents:'none' }}/>
 
-        {/* Left-edge gradient so DNA canvas doesn't bleed */}
-        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right, #080614 55%, transparent)', pointerEvents:'none' }}/>
+      {/* Molecular particle canvas — very subtle over video */}
+      <div style={{ position:'absolute', inset:0, zIndex:2, opacity:0.18, pointerEvents:'none' }}>
+        <MolecularCanvas />
+      </div>
 
-        <div style={{ position:'relative', zIndex:2 }}>
-          <div style={{ ...fade(0.08) }}>
-            <span className="mono" style={{ fontSize:'.56rem', letterSpacing:'.3em', textTransform:'uppercase', color:'rgba(200,160,255,0.6)', display:'block', marginBottom:'1.8rem' }}>Precision Index Discovery Presents</span>
+      {/* Bottom fade into StatsBar dark section */}
+      <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'28%', background:'linear-gradient(to bottom, transparent, var(--forest))', zIndex:3, pointerEvents:'none' }}/>
+
+      {/* ── Left-aligned content ── */}
+      <div style={{ position:'relative', zIndex:4, height:'100%', display:'flex', alignItems:'center', padding:isMobile?'0 1.6rem':'0 6.5rem' }}>
+        <div style={{ maxWidth:isMobile?'100%':640, paddingTop:isMobile?'4rem':0 }}>
+
+          <div style={{ ...fade(0.1) }}>
+            <span className="mono" style={{ fontSize:'.58rem', letterSpacing:'.3em', textTransform:'uppercase', color:'rgba(194,72,43,0.85)', display:'block', marginBottom:'2rem' }}>Precision Index Discovery</span>
           </div>
 
-          {/* DECODE — huge display */}
-          <div style={{ ...fade(0.18), marginBottom:'.15rem' }}>
-            <span className="mono" style={{ fontSize:isMobile?'clamp(3.2rem,16vw,5.5rem)':'clamp(4rem,7.5vw,8.8rem)', fontWeight:700, letterSpacing:'.04em', color:'#FFFFFF', lineHeight:1, display:'block', textShadow:'0 0 80px rgba(194,72,43,0.2)' }}>DECODE</span>
+          {/* DECODE — the hero word */}
+          <div style={{ ...fade(0.2) }}>
+            <span style={{ fontFamily:'Inter,system-ui,sans-serif', fontSize:isMobile?'clamp(4rem,18vw,6.5rem)':'clamp(6rem,10vw,12rem)', fontWeight:800, letterSpacing:'.06em', color:'#FFFFFF', lineHeight:.9, display:'block', textShadow:'0 2px 80px rgba(194,72,43,0.18)' }}>DECODE</span>
           </div>
 
           <h1 className="serif" style={{
-            ...fade(0.28),
-            fontSize:isMobile?'clamp(1.7rem,7vw,2.6rem)':'clamp(1.9rem,3.2vw,3.8rem)',
-            fontWeight:300, lineHeight:1.08, letterSpacing:'-.01em', color:'rgba(255,255,255,0.88)',
-            margin:'0 0 1.8rem',
+            ...fade(0.3),
+            fontSize:isMobile?'clamp(1.5rem,5.5vw,2.2rem)':'clamp(1.8rem,2.8vw,3.4rem)',
+            fontWeight:300, lineHeight:1.12, color:'rgba(255,255,255,0.78)',
+            margin:isMobile?'.8rem 0 1.6rem':'1rem 0 2rem',
           }}>
-            the molecular<br />landscape of{' '}
-            <em style={{ fontStyle:'italic', color:'#e879f9' }}>disease.</em>
+            the molecular landscape of{' '}<em style={{ fontStyle:'italic', color:'#C2482B' }}>disease.</em>
           </h1>
 
-          <p style={{ ...fade(0.4), fontSize:isMobile?'.86rem':'.94rem', color:'rgba(255,255,255,0.45)', lineHeight:1.9, maxWidth:420, fontWeight:300, marginBottom:'2.4rem' }}>
+          <p style={{ ...fade(0.42), fontSize:isMobile?'.86rem':'.96rem', color:'rgba(255,255,255,0.4)', lineHeight:1.9, maxWidth:460, fontWeight:300, marginBottom:'2.8rem' }}>
             Next-generation protein biomarker discovery powered by proximity extension assay technology — simultaneously quantifying thousands of proteins with femtomolar sensitivity.
           </p>
 
-          <div style={{ ...fade(0.52) }}>
+          <div style={{ ...fade(0.54), display:'flex', gap:'.9rem', flexWrap:'wrap' }}>
             <a href="#indices"
-              style={{ display:'inline-flex', alignItems:'center', gap:'.55rem', padding:'.82rem 2rem', borderRadius:100, background:'transparent', color:'#fff', border:'1.5px solid rgba(255,255,255,0.38)', fontSize:'.85rem', fontWeight:300, textDecoration:'none', transition:'all .28s ease', backdropFilter:'blur(6px)' }}
-              onMouseEnter={e=>{ const el=e.currentTarget as HTMLElement; el.style.background='rgba(232,121,249,0.12)'; el.style.borderColor='rgba(232,121,249,0.55)' }}
-              onMouseLeave={e=>{ const el=e.currentTarget as HTMLElement; el.style.background='transparent'; el.style.borderColor='rgba(255,255,255,0.38)' }}
-            >Explore the platform <span style={{ fontSize:'1rem' }}>→</span></a>
+              style={{ padding:'.9rem 2.2rem', borderRadius:100, background:'#C2482B', color:'#fff', fontSize:'.86rem', fontWeight:500, textDecoration:'none', transition:'all .28s ease', boxShadow:'0 4px 32px rgba(194,72,43,0.45)', letterSpacing:'.02em', display:'inline-flex', alignItems:'center', gap:'.5rem' }}
+              onMouseEnter={e=>{ const el=e.currentTarget as HTMLElement; el.style.background='#a83820'; el.style.transform='translateY(-2px)'; el.style.boxShadow='0 8px 44px rgba(194,72,43,0.6)' }}
+              onMouseLeave={e=>{ const el=e.currentTarget as HTMLElement; el.style.background='#C2482B'; el.style.transform='none'; el.style.boxShadow='0 4px 32px rgba(194,72,43,0.45)' }}
+            >Explore the platform <span>→</span></a>
+            <a href="#about"
+              style={{ padding:'.9rem 2.2rem', borderRadius:100, background:'rgba(255,255,255,0.05)', color:'rgba(255,255,255,0.65)', border:'1px solid rgba(255,255,255,0.18)', fontSize:'.86rem', fontWeight:300, textDecoration:'none', transition:'all .28s ease', backdropFilter:'blur(10px)' }}
+              onMouseEnter={e=>{ const el=e.currentTarget as HTMLElement; el.style.borderColor='rgba(255,255,255,0.45)'; el.style.color='#fff' }}
+              onMouseLeave={e=>{ const el=e.currentTarget as HTMLElement; el.style.borderColor='rgba(255,255,255,0.18)'; el.style.color='rgba(255,255,255,0.65)' }}
+            >For Clinicians</a>
           </div>
         </div>
       </div>
 
-      {/* ── RIGHT: organic molecular animation ── */}
-      <div style={{ flex:1, position:'relative', minHeight:isMobile?'48vh':'auto', overflow:'hidden' }}>
-        <OrganicCanvas />
-
-        {/* Left-edge gradient so canvas blends into the dark left panel */}
-        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right, #080614 0%, rgba(8,6,20,0.35) 28%, transparent 60%)', pointerEvents:'none' }}/>
-
-        {/* "Interact with the molecular world" pill — from reference */}
-        {!isMobile&&(
-          <div style={{ position:'absolute', top:'46%', right:'2.5rem', zIndex:2, display:'flex', alignItems:'center', gap:'.65rem', opacity:loaded?1:0, transition:'opacity 1.5s 1.2s' }}>
-            <div style={{ width:28, height:28, borderRadius:'50%', border:'1px solid rgba(232,121,249,0.5)', background:'rgba(8,6,20,0.55)', backdropFilter:'blur(10px)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-              <div style={{ width:8, height:8, borderRadius:'50%', background:'rgba(232,121,249,0.9)', boxShadow:'0 0 10px rgba(232,121,249,0.6)' }}/>
-            </div>
-            <div>
-              <div style={{ fontSize:'.73rem', color:'rgba(255,255,255,0.75)', fontWeight:400 }}>Interact</div>
-              <div style={{ fontSize:'.66rem', color:'rgba(255,255,255,0.38)', lineHeight:1.3 }}>with the molecular world</div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Bottom fade to paper */}
-      <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'22%', background:'linear-gradient(to bottom, transparent, var(--paper))', zIndex:4, pointerEvents:'none' }}/>
-
-      {/* Scroll to explore — from reference */}
+      {/* Scroll indicator */}
       {!isMobile&&(
-        <div style={{ position:'absolute', bottom:'2.8rem', left:'5.5rem', zIndex:5, display:'flex', alignItems:'center', gap:'.75rem', opacity:loaded?0.6:0, transition:'opacity 1.5s 1.3s' }}>
-          <div style={{ width:20, height:32, borderRadius:10, border:'1px solid rgba(255,255,255,0.28)', display:'flex', justifyContent:'center', paddingTop:5 }}>
-            <div style={{ width:2, height:8, background:'rgba(255,255,255,0.6)', borderRadius:1, animation:'scroll-pulse 2s ease-in-out infinite' }}/>
+        <div style={{ position:'absolute', bottom:'3rem', left:'6.5rem', zIndex:5, display:'flex', alignItems:'center', gap:'.8rem', opacity:loaded?0.5:0, transition:'opacity 1.5s 1.4s' }}>
+          <div style={{ width:20, height:32, borderRadius:10, border:'1px solid rgba(255,255,255,0.22)', display:'flex', justifyContent:'center', paddingTop:5 }}>
+            <div style={{ width:2, height:8, background:'rgba(255,255,255,0.55)', borderRadius:1, animation:'scroll-pulse 2s ease-in-out infinite' }}/>
           </div>
-          <span className="mono" style={{ fontSize:'.5rem', letterSpacing:'.22em', textTransform:'uppercase', color:'rgba(255,255,255,0.38)' }}>Scroll to explore</span>
+          <span className="mono" style={{ fontSize:'.5rem', letterSpacing:'.22em', textTransform:'uppercase', color:'rgba(255,255,255,0.32)' }}>Scroll to explore</span>
+        </div>
+      )}
+
+      {/* Interact label — top right */}
+      {!isMobile&&(
+        <div style={{ position:'absolute', top:'50%', right:'3rem', zIndex:5, transform:'translateY(-50%)', display:'flex', alignItems:'center', gap:'.65rem', opacity:loaded?0.75:0, transition:'opacity 1.5s 1.2s' }}>
+          <div style={{ width:26, height:26, borderRadius:'50%', border:'1px solid rgba(194,72,43,0.5)', background:'rgba(8,6,20,0.45)', backdropFilter:'blur(10px)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <div style={{ width:7, height:7, borderRadius:'50%', background:'rgba(194,72,43,0.9)', boxShadow:'0 0 12px rgba(194,72,43,0.7)' }}/>
+          </div>
+          <div>
+            <div style={{ fontSize:'.7rem', color:'rgba(255,255,255,0.7)', fontWeight:400, lineHeight:1.3 }}>Interact</div>
+            <div style={{ fontSize:'.63rem', color:'rgba(255,255,255,0.32)', lineHeight:1.3 }}>with the molecular world</div>
+          </div>
         </div>
       )}
     </section>
