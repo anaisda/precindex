@@ -213,13 +213,155 @@ function Navbar({ scrolled }: { scrolled: boolean }) {
   )
 }
 
-// ── HERO — FULL-SCREEN VIDEO ──────────────────────────────────────────────────
+// ── DNA HELIX CANVAS ─────────────────────────────────────────────────────────
+
+function DNACanvas() {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const rafRef    = useRef<number>(0)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    let W = canvas.offsetWidth, H = canvas.offsetHeight
+    canvas.width = W; canvas.height = H
+
+    const onResize = () => {
+      W = canvas.offsetWidth; H = canvas.offsetHeight
+      canvas.width = W; canvas.height = H
+    }
+    window.addEventListener('resize', onResize)
+
+    // Floating micro-particles
+    const particles = Array.from({ length: 80 }, () => ({
+      x: Math.random() * 1, y: Math.random(),
+      r: Math.random() * 1.2 + 0.3,
+      speed: Math.random() * 0.00035 + 0.00012,
+      drift: (Math.random() - 0.5) * 0.0003,
+      opacity: Math.random() * 0.35 + 0.08,
+    }))
+
+    let t = 0
+    const tick = () => {
+      t += 0.008
+      ctx.clearRect(0, 0, W, H)
+
+      // Deep dark bg
+      ctx.fillStyle = '#050b14'
+      ctx.fillRect(0, 0, W, H)
+
+      // Central radial glow
+      const bg = ctx.createRadialGradient(W * .5, H * .45, 0, W * .5, H * .45, W * .55)
+      bg.addColorStop(0, 'rgba(0,50,80,.45)')
+      bg.addColorStop(1, 'rgba(0,0,0,0)')
+      ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H)
+
+      // Floating particles
+      for (const p of particles) {
+        p.y -= p.speed; p.x += p.drift
+        if (p.y < -0.02) p.y = 1.02
+        if (p.x < -0.02) p.x = 1.02
+        if (p.x >  1.02) p.x = -0.02
+        ctx.beginPath()
+        ctx.arc(p.x * W, p.y * H, p.r, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(100,210,240,${p.opacity})`
+        ctx.fill()
+      }
+
+      // Helper: draw one DNA double-helix
+      const drawHelix = (cx: number, radius: number, nBases: number, phase: number) => {
+        const top = -H * .08, bot = H * 1.08
+        const step = (bot - top) / nBases
+        const turns = 4.5
+
+        const s1: { x:number; y:number; z:number }[] = []
+        const s2: { x:number; y:number; z:number }[] = []
+
+        for (let i = 0; i < nBases; i++) {
+          const y = top + i * step
+          const a = phase + (i / nBases) * Math.PI * 2 * turns
+          s1.push({ x: cx + Math.sin(a) * radius,           y, z: Math.cos(a) })
+          s2.push({ x: cx + Math.sin(a + Math.PI) * radius, y, z: Math.cos(a + Math.PI) })
+        }
+
+        // Strand path helper
+        const drawStrand = (nodes: typeof s1, r: number, g: number, b: number) => {
+          ctx.beginPath()
+          nodes.forEach((n, i) => {
+            if (i === 0) { ctx.moveTo(n.x, n.y); return }
+            const p = nodes[i-1]
+            ctx.quadraticCurveTo(p.x, p.y, (p.x+n.x)/2, (p.y+n.y)/2)
+          })
+          const gr = ctx.createLinearGradient(0, top, 0, bot)
+          gr.addColorStop(0,   `rgba(${r},${g},${b},0)`)
+          gr.addColorStop(.1,  `rgba(${r},${g},${b},.65)`)
+          gr.addColorStop(.9,  `rgba(${r},${g},${b},.65)`)
+          gr.addColorStop(1,   `rgba(${r},${g},${b},0)`)
+          ctx.strokeStyle = gr
+          ctx.lineWidth = Math.max(1.2, radius * 0.03)
+          ctx.stroke()
+        }
+
+        drawStrand(s1, 56, 189, 248)  // cyan-blue
+        drawStrand(s2, 74, 222, 128)  // green
+
+        // Base pair rungs every 2 nodes
+        for (let i = 0; i < nBases; i += 2) {
+          const a = (s1[i].z + 1) / 2
+          ctx.beginPath()
+          ctx.moveTo(s1[i].x, s1[i].y)
+          ctx.lineTo(s2[i].x, s2[i].y)
+          ctx.strokeStyle = `rgba(147,220,230,${.06 + a * .28})`
+          ctx.lineWidth = Math.max(.5, radius * 0.014)
+          ctx.stroke()
+        }
+
+        // Glowing nodes on both strands
+        const drawNodes = (nodes: typeof s1, r: number, g: number, b: number) => {
+          for (const n of nodes) {
+            const depth = (n.z + 1) / 2
+            const nr = Math.max(1.5, radius * .058 * (.5 + depth * .5))
+            const glo = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, nr * 4.5)
+            glo.addColorStop(0, `rgba(${r},${g},${b},${.3 + depth * .4})`)
+            glo.addColorStop(1, `rgba(${r},${g},${b},0)`)
+            ctx.beginPath(); ctx.arc(n.x, n.y, nr * 4.5, 0, Math.PI * 2)
+            ctx.fillStyle = glo; ctx.fill()
+            ctx.beginPath(); ctx.arc(n.x, n.y, nr, 0, Math.PI * 2)
+            ctx.fillStyle = `rgba(${r},${g},${b},${.75 + depth * .25})`; ctx.fill()
+          }
+        }
+
+        drawNodes(s1, 56, 189, 248)
+        drawNodes(s2, 74, 222, 128)
+      }
+
+      // Draw helices: one large centred, two flanking on desktop
+      const mainR = Math.min(W * .07, 96)
+      drawHelix(W * .5, mainR, 48, t)
+      if (W > 768) {
+        drawHelix(W * .16, Math.min(W * .038, 52), 34, t * .75 + 1.4)
+        drawHelix(W * .84, Math.min(W * .038, 52), 34, t * .88 + 0.7)
+      }
+
+      rafRef.current = requestAnimationFrame(tick)
+    }
+
+    tick()
+    return () => { cancelAnimationFrame(rafRef.current); window.removeEventListener('resize', onResize) }
+  }, [])
+
+  return <canvas ref={canvasRef} style={{ position:'absolute', inset:0, width:'100%', height:'100%' }} aria-hidden="true" />
+}
+
+// ── HERO ─────────────────────────────────────────────────────────────────────
 
 function Hero() {
   const [loaded,setLoaded]=useState(false)
   const isMobile=useIsMobile()
 
-  useEffect(()=>{ const t=setTimeout(()=>setLoaded(true),200); return ()=>clearTimeout(t) },[])
+  useEffect(()=>{ const t=setTimeout(()=>setLoaded(true),120); return ()=>clearTimeout(t) },[])
 
   const fade=(d:number):React.CSSProperties=>({
     opacity:loaded?1:0, transform:loaded?'none':'translateY(22px)',
@@ -227,84 +369,62 @@ function Hero() {
   })
 
   return (
-    <section id="hero" style={{ position:'relative', height:'100vh', minHeight:isMobile?640:740, overflow:'hidden', background:'#0a1209' }}>
+    <section id="hero" style={{ position:'relative', height:'100vh', minHeight:isMobile?640:720, overflow:'hidden', background:'#050b14' }}>
 
-      {/* Full-screen biology video */}
-      <video autoPlay muted loop playsInline
-        style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', filter:'saturate(2.4) brightness(0.62) contrast(1.45) hue-rotate(190deg)', zIndex:0 }}
-        onError={e=>{ const v=e.currentTarget; v.src='https://videos.pexels.com/video-files/4065920/4065920-uhd_2560_1440_25fps.mp4'; v.load() }}
-      >
-        <source src="https://videos.pexels.com/video-files/3209828/3209828-hd_1920_1080_25fps.mp4" type="video/mp4" />
-        <source src="https://videos.pexels.com/video-files/4065920/4065920-uhd_2560_1440_25fps.mp4" type="video/mp4" />
-      </video>
+      {/* DNA animation fills the hero */}
+      <DNACanvas />
 
-      {/* Warm cream veil — light theme over biology */}
-      <div style={{ position:'absolute', inset:0, background:'rgba(247,245,239,0.44)', zIndex:1, pointerEvents:'none' }} />
-      {/* Radial vignette darkening edges for text legibility */}
-      <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse 85% 85% at 50% 50%, transparent 25%, rgba(21,29,24,0.22) 100%)', zIndex:1, pointerEvents:'none' }} />
-      {/* Bottom fade to paper */}
-      <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'32%', background:'linear-gradient(to bottom, transparent, var(--paper))', zIndex:2, pointerEvents:'none' }} />
+      {/* Soft bottom gradient so hero blends into the light site */}
+      <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'28%', background:'linear-gradient(to bottom, transparent, var(--paper))', zIndex:2, pointerEvents:'none' }} />
 
-      {/* Molecular canvas on top of video */}
-      <div style={{ position:'absolute', inset:0, zIndex:3, pointerEvents:'none' }}>
-        <MolecularCanvas />
-      </div>
+      {/* Centred headline */}
+      <div style={{ position:'relative', zIndex:3, height:'100%', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', padding:isMobile?'5rem 1.5rem 5rem':'0 5rem' }}>
 
-      {/* Centred headline content */}
-      <div style={{ position:'relative', zIndex:4, height:'100%', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', padding:isMobile?'5rem 1.5rem 4rem':'0 5rem' }}>
-
-        {/* Microscope ring ornament */}
-        <div style={{ ...fade(0.1), width:48, height:48, borderRadius:'50%', border:'1.5px solid rgba(28,62,45,0.35)', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:'2rem' }}>
-          <div style={{ width:22, height:22, borderRadius:'50%', border:'1px solid rgba(28,62,45,0.4)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-            <div style={{ width:6, height:6, borderRadius:'50%', background:'#C2482B', boxShadow:'0 0 10px rgba(194,72,43,0.5)' }} />
+        {/* Ring ornament */}
+        <div style={{ ...fade(0.08), width:50, height:50, borderRadius:'50%', border:'1.5px solid rgba(56,189,248,0.35)', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:'2rem' }}>
+          <div style={{ width:23, height:23, borderRadius:'50%', border:'1px solid rgba(74,222,128,0.4)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <div style={{ width:7, height:7, borderRadius:'50%', background:'#C2482B', boxShadow:'0 0 12px rgba(194,72,43,0.7)' }} />
           </div>
         </div>
 
-        <div style={{ ...fade(0.22) }}>
-          <span className="mono" style={{ fontSize:isMobile?'.56rem':'.62rem', letterSpacing:'.3em', textTransform:'uppercase', color:'rgba(28,62,45,0.7)' }}>Precision 360 Biosystem</span>
+        <div style={{ ...fade(0.2) }}>
+          <span className="mono" style={{ fontSize:isMobile?'.56rem':'.62rem', letterSpacing:'.32em', textTransform:'uppercase', color:'rgba(56,189,248,0.65)' }}>Precision 360 Biosystem</span>
         </div>
 
         <h1 className="serif" style={{
-          ...fade(0.34),
-          fontSize:isMobile?'clamp(2.6rem,11vw,4rem)':'clamp(3.6rem,6.2vw,7.4rem)',
-          fontWeight:300, lineHeight:1.0, letterSpacing:'-.022em', color:'#151D18',
+          ...fade(0.32),
+          fontSize:isMobile?'clamp(2.6rem,11vw,4rem)':'clamp(3.8rem,6.4vw,7.8rem)',
+          fontWeight:300, lineHeight:1.0, letterSpacing:'-.022em', color:'#F0F9FF',
           margin:isMobile?'1rem 0 1.3rem':'1.2rem 0 1.5rem',
-          textShadow:'0 2px 30px rgba(247,245,239,0.6)',
+          textShadow:'0 0 80px rgba(56,189,248,0.15)',
         }}>
           A new architecture<br />for{' '}
-          <em style={{ fontStyle:'italic', color:'#C2482B', textShadow:'0 0 40px rgba(194,72,43,0.25)' }}>precision medicine</em>
+          <em style={{ fontStyle:'italic', color:'#C2482B', textShadow:'0 0 50px rgba(194,72,43,0.4)' }}>precision medicine</em>
         </h1>
 
-        <p style={{ ...fade(0.48), fontSize:isMobile?'.88rem':'1.02rem', color:'rgba(21,29,24,0.62)', lineHeight:1.88, maxWidth:520, fontWeight:300, marginBottom:isMobile?'2.2rem':'3rem' }}>
+        <p style={{ ...fade(0.46), fontSize:isMobile?'.88rem':'1.02rem', color:'rgba(240,249,255,0.58)', lineHeight:1.9, maxWidth:520, fontWeight:300, marginBottom:isMobile?'2.2rem':'3rem' }}>
           One finger-prick sample. Up to seven panels. Designed to uncover what other tests miss — delivered through the clinic that already knows you.
         </p>
 
-        <div style={{ ...fade(0.6), display:'flex', gap:'.85rem', flexWrap:'wrap', justifyContent:'center' }}>
+        <div style={{ ...fade(0.58), display:'flex', gap:'.85rem', flexWrap:'wrap', justifyContent:'center' }}>
           <a href="#indices"
-            style={{ padding:isMobile?'.78rem 1.9rem':'.9rem 2.6rem', borderRadius:100, background:'#1C3E2D', color:'#F7F5EF', fontSize:'.85rem', fontWeight:400, textDecoration:'none', transition:'all .3s ease', boxShadow:'0 4px 28px rgba(28,62,45,0.3)', letterSpacing:'.01em', animation:'membrane-pulse 3s ease-in-out infinite' }}
-            onMouseEnter={e=>{ const el=e.currentTarget as HTMLElement; el.style.background='#2a5240'; el.style.transform='translateY(-2px)'; el.style.boxShadow='0 8px 40px rgba(28,62,45,0.4)' }}
-            onMouseLeave={e=>{ const el=e.currentTarget as HTMLElement; el.style.background='#1C3E2D'; el.style.transform='none'; el.style.boxShadow='0 4px 28px rgba(28,62,45,0.3)' }}
+            style={{ padding:isMobile?'.78rem 1.9rem':'.9rem 2.6rem', borderRadius:100, background:'#1C3E2D', color:'#F7F5EF', fontSize:'.85rem', fontWeight:400, textDecoration:'none', transition:'all .3s ease', boxShadow:'0 4px 28px rgba(28,62,45,0.4)', letterSpacing:'.01em' }}
+            onMouseEnter={e=>{ const el=e.currentTarget as HTMLElement; el.style.background='#2a5240'; el.style.transform='translateY(-2px)'; el.style.boxShadow='0 8px 40px rgba(28,62,45,0.55)' }}
+            onMouseLeave={e=>{ const el=e.currentTarget as HTMLElement; el.style.background='#1C3E2D'; el.style.transform='none'; el.style.boxShadow='0 4px 28px rgba(28,62,45,0.4)' }}
           >For Patients</a>
           <a href="#about"
-            style={{ padding:isMobile?'.78rem 1.9rem':'.9rem 2.6rem', borderRadius:100, background:'rgba(247,245,239,0.82)', color:'#1C3E2D', border:'1.5px solid rgba(28,62,45,0.22)', fontSize:'.85rem', fontWeight:300, textDecoration:'none', transition:'all .28s ease', backdropFilter:'blur(8px)' }}
-            onMouseEnter={e=>{ const el=e.currentTarget as HTMLElement; el.style.background='rgba(247,245,239,0.96)'; el.style.borderColor='rgba(28,62,45,0.5)' }}
-            onMouseLeave={e=>{ const el=e.currentTarget as HTMLElement; el.style.background='rgba(247,245,239,0.82)'; el.style.borderColor='rgba(28,62,45,0.22)' }}
+            style={{ padding:isMobile?'.78rem 1.9rem':'.9rem 2.6rem', borderRadius:100, background:'rgba(5,11,20,0.5)', color:'rgba(240,249,255,0.85)', border:'1px solid rgba(56,189,248,0.3)', fontSize:'.85rem', fontWeight:300, textDecoration:'none', transition:'all .28s ease', backdropFilter:'blur(8px)' }}
+            onMouseEnter={e=>{ const el=e.currentTarget as HTMLElement; el.style.borderColor='rgba(56,189,248,0.65)'; el.style.color='#F0F9FF' }}
+            onMouseLeave={e=>{ const el=e.currentTarget as HTMLElement; el.style.borderColor='rgba(56,189,248,0.3)'; el.style.color='rgba(240,249,255,0.85)' }}
           >For Clinicians</a>
         </div>
       </div>
 
-      {/* Specimen slide label */}
-      {!isMobile&&(
-        <div style={{ position:'absolute', bottom:'2.2rem', right:'2.5rem', zIndex:4, background:'rgba(247,245,239,0.82)', border:'1px solid rgba(28,62,45,0.1)', borderRadius:8, padding:'.55rem .9rem', backdropFilter:'blur(10px)' }}>
-          <div className="mono" style={{ fontSize:'.5rem', letterSpacing:'.2em', textTransform:'uppercase', color:'rgba(21,29,24,0.45)' }}>Live · Cellular Microscopy</div>
-        </div>
-      )}
-
       {/* Scroll indicator */}
       {!isMobile&&(
-        <div style={{ position:'absolute', bottom:'2.4rem', left:'50%', transform:'translateX(-50%)', zIndex:4, display:'flex', flexDirection:'column', alignItems:'center', gap:'.5rem', opacity:loaded?0.5:0, transition:'opacity 1.5s 1.2s' }}>
-          <div style={{ width:1, height:40, background:'linear-gradient(to bottom,#1C3E2D,transparent)', animation:'scroll-pulse 2.4s ease-in-out infinite' }} />
-          <span className="mono" style={{ fontSize:'.48rem', letterSpacing:'.28em', textTransform:'uppercase', color:'rgba(21,29,24,0.45)' }}>Scroll</span>
+        <div style={{ position:'absolute', bottom:'2.2rem', left:'50%', transform:'translateX(-50%)', zIndex:3, display:'flex', flexDirection:'column', alignItems:'center', gap:'.5rem', opacity:loaded?0.45:0, transition:'opacity 1.5s 1.4s' }}>
+          <div style={{ width:1, height:40, background:'linear-gradient(to bottom, rgba(56,189,248,0.6), transparent)', animation:'scroll-pulse 2.4s ease-in-out infinite' }} />
+          <span className="mono" style={{ fontSize:'.48rem', letterSpacing:'.28em', textTransform:'uppercase', color:'rgba(56,189,248,0.45)' }}>Scroll</span>
         </div>
       )}
     </section>
