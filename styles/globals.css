@@ -1,26 +1,26 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500;700;800&family=JetBrains+Mono:wght@300;400;700&display=swap');
 
 :root {
-  --paper:   #F7F5EF;
-  --cream:   #EDE9DF;
-  --sage-bg: #E8EDDF;
-  --forest:  #1C3E2D;
-  --moss:    #3A6447;
-  --sage:    #7A9E85;
-  --coral:   #C2482B;
-  --amber:   #C78B3A;
-  --gold:    #D4B86A;
-  --ink:     #151D18;
-  --muted:   rgba(21,29,24,0.58);
-  --dimmer:  rgba(21,29,24,0.35);
+  --paper:   #FAF8F4;
+  --cream:   #F3EDE4;
+  --sage-bg: #EAE9E1;
+  --forest:  #2B4D3F;
+  --moss:    #476B57;
+  --sage:    #85A894;
+  --coral:   #B8725E;
+  --amber:   #C4955A;
+  --gold:    #D2B468;
+  --ink:     #1C2820;
+  --muted:   rgba(28,40,32,0.58);
+  --dimmer:  rgba(28,40,32,0.35);
   --white:   #FFFFFF;
 
   /* legacy aliases so nothing breaks */
-  --void:    #1C3E2D;
-  --deep:    #1C3E2D;
-  --light:   #F7F5EF;
-  --cyan:    #C2482B;
-  --dim:     rgba(21,29,24,0.58);
+  --void:    #2B4D3F;
+  --deep:    #2B4D3F;
+  --light:   #FAF8F4;
+  --cyan:    #B8725E;
+  --dim:     rgba(28,40,32,0.58);
 }
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -42,10 +42,10 @@ body {
 ul { list-style: none; }
 input, select, textarea, button { font-family: inherit; }
 
-::selection { background: rgba(194,72,43,0.18); }
+::selection { background: rgba(184,114,94,0.18); }
 ::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-track { background: var(--paper); }
-::-webkit-scrollbar-thumb { background: rgba(28,62,45,0.25); border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: rgba(43,77,63,0.25); border-radius: 2px; }
 
 /* Biology-inspired keyframes */
 @keyframes cell-expand {
@@ -53,8 +53,8 @@ input, select, textarea, button { font-family: inherit; }
   to   { transform: scale(1) translateY(0);       opacity: 1; filter: blur(0); }
 }
 @keyframes membrane-pulse {
-  0%,100% { box-shadow: 0 0 0 0 rgba(28,62,45,0.15); }
-  55%     { box-shadow: 0 0 0 14px rgba(28,62,45,0); }
+  0%,100% { box-shadow: 0 0 0 0 rgba(43,77,63,0.15); }
+  55%     { box-shadow: 0 0 0 14px rgba(43,77,63,0); }
 }
 @keyframes organelle-float {
   0%,100% { transform: translateY(0)   rotate(0deg); }
