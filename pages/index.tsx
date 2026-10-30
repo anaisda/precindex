@@ -158,16 +158,16 @@ function Navbar({ scrolled }: { scrolled: boolean }) {
   const [hov,setHov]=useState<string|null>(null)
   const [open,setOpen]=useState(false)
   const isMobile=useIsMobile()
-  const onDark = true
+  const onDark = !scrolled
 
   return (
     <nav style={{
       position:'fixed',top:0,left:0,right:0,zIndex:990,
       padding:isMobile?'1rem 1.4rem':'1.1rem 3.5rem',
       display:'flex',alignItems:'center',justifyContent:'space-between',
-      background: scrolled?'rgba(8,6,20,0.92)':'transparent',
-      backdropFilter: scrolled?'blur(24px)':'none',
-      borderBottom: scrolled?'1px solid rgba(255,255,255,0.07)':'none',
+      background: scrolled?'rgba(250,248,244,0.82)':'rgba(255,255,255,0.04)',
+      backdropFilter:'blur(22px)',
+      borderBottom: scrolled?'1px solid rgba(28,40,32,0.07)':'1px solid rgba(255,255,255,0.06)',
       transition:'all .45s cubic-bezier(.16,1,.3,1)',
     }}>
       <a href="#hero" style={{ textDecoration:'none' }}>
@@ -196,10 +196,10 @@ function Navbar({ scrolled }: { scrolled: boolean }) {
 
       {isMobile && (
         <button onClick={()=>setOpen(o=>!o)} aria-label="Menu"
-          style={{ background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.15)', borderRadius:'50%', width:38, height:38, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
+          style={{ background:scrolled?'rgba(28,40,32,0.06)':'rgba(255,255,255,0.08)', border:`1px solid ${scrolled?'rgba(28,40,32,0.12)':'rgba(255,255,255,0.18)'}`, borderRadius:'50%', width:38, height:38, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', transition:'all .45s ease' }}>
           <div style={{ position:'relative', width:15, height:10 }}>
             {([0,4,8] as const).map((top,i)=>(
-              <span key={i} style={{ position:'absolute', left:0, top:open?4:top, width:15, height:1.5, background:'#fff', opacity:open&&i===1?0:1, transform:open?(i===0?'rotate(45deg)':i===2?'rotate(-45deg)':'none'):'none', transition:'all .28s ease', borderRadius:1 }} />
+              <span key={i} style={{ position:'absolute', left:0, top:open?4:top, width:15, height:1.5, background:scrolled?'#2B4D3F':'#fff', opacity:open&&i===1?0:1, transform:open?(i===0?'rotate(45deg)':i===2?'rotate(-45deg)':'none'):'none', transition:'all .28s ease', borderRadius:1 }} />
             ))}
           </div>
         </button>
@@ -222,7 +222,7 @@ function Navbar({ scrolled }: { scrolled: boolean }) {
 
 const HERO_SLIDES = [
   { src: '/karolinska.webp', location: 'Karolinska Institutet · Stockholm', kb: 'a' },
-  { src: '/bg.jpeg',         location: 'Molecular Discovery',               kb: 'b' },
+  { src: '/bg.webp',         location: 'Molecular Discovery',               kb: 'b' },
   { src: '/wallpaper.jpg',   location: 'Precision Research',                kb: 'c' },
 ]
 
@@ -409,7 +409,7 @@ function BiologicalComplexity() {
         {/* Image side — biology microscopy */}
         <div style={{ position:'relative', minHeight:isMobile?280:620, overflow:'hidden' }}>
           <img
-            src="/bg.jpeg"
+            src="/bg.webp"
             alt="DNA molecular structure"
             style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', filter:'saturate(0.7) brightness(0.95)', opacity:vis?1:0, transform:vis?'scale(1)':'scale(1.06)', transition:'opacity 1.1s .2s, transform 1.4s .2s cubic-bezier(.16,1,.3,1)' }}
             onError={e=>{ (e.currentTarget as HTMLImageElement).style.display='none' }}
