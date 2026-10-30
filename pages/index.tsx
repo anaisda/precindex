@@ -218,99 +218,116 @@ function Navbar({ scrolled }: { scrolled: boolean }) {
   )
 }
 
-// ── HERO — CINEMATIC VIDEO ────────────────────────────────────────────────────
+// ── HERO CAROUSEL ─────────────────────────────────────────────────────────────
+
+const HERO_SLIDES = [
+  { src: '/karolinska.webp', location: 'Karolinska Institutet · Stockholm', kb: 'a' },
+  { src: '/bg.jpeg',         location: 'Molecular Discovery',               kb: 'b' },
+  { src: '/wallpaper.jpg',   location: 'Precision Research',                kb: 'c' },
+]
 
 function Hero() {
-  const [loaded,setLoaded]=useState(false)
-  const isMobile=useIsMobile()
-  useEffect(()=>{ const t=setTimeout(()=>setLoaded(true),80); return ()=>clearTimeout(t) },[])
-  const fade=(d:number):React.CSSProperties=>({
-    opacity:loaded?1:0, transform:loaded?'none':'translateY(28px)',
-    transition:`all 1.2s cubic-bezier(.16,1,.3,1) ${d}s`,
+  const [loaded, setLoaded] = useState(false)
+  const [slide,  setSlide]  = useState(0)
+  const isMobile = useIsMobile()
+
+  useEffect(() => { const t = setTimeout(() => setLoaded(true), 80); return () => clearTimeout(t) }, [])
+
+  useEffect(() => {
+    const t = setInterval(() => setSlide(s => (s + 1) % HERO_SLIDES.length), 5800)
+    return () => clearInterval(t)
+  }, [])
+
+  const fade = (d: number): React.CSSProperties => ({
+    opacity: loaded ? 1 : 0, transform: loaded ? 'none' : 'translateY(28px)',
+    transition: `all 1.2s cubic-bezier(.16,1,.3,1) ${d}s`,
   })
 
   return (
-    <section id="hero" style={{ position:'relative', height:'100vh', minHeight:isMobile?620:700, overflow:'hidden', background:'#080614' }}>
+    <section id="hero" style={{ position: 'relative', height: '100vh', minHeight: isMobile ? 620 : 700, overflow: 'hidden', background: '#080614' }}>
 
-      {/* ── Full-screen video ── */}
-      <video autoPlay muted loop playsInline
-        style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', zIndex:0 }}
-      >
-        <source src="/287263.mp4" type="video/mp4" />
-      </video>
+      {/* ── Image carousel with Ken Burns ── */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
+        {HERO_SLIDES.map((sl, i) => (
+          <div key={i} style={{ position: 'absolute', inset: 0, opacity: i === slide ? 1 : 0, transition: 'opacity 1.9s cubic-bezier(.4,0,.2,1)', overflow: 'hidden' }}>
+            <img
+              src={sl.src} alt={sl.location}
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', willChange: 'transform', animation: `kb-${sl.kb} 10s ease-in-out alternate infinite`, animationDelay: `-${i * 3.3}s` }}
+            />
+          </div>
+        ))}
+      </div>
 
-      {/* ── Cinematic gradient: dense dark on left, fades to reveal video on right ── */}
-      <div style={{ position:'absolute', inset:0, background:'linear-gradient(108deg, rgba(8,6,20,0.96) 0%, rgba(8,6,20,0.85) 30%, rgba(8,6,20,0.55) 58%, rgba(8,6,20,0.18) 100%)', zIndex:1, pointerEvents:'none' }}/>
+      {/* ── Cinematic gradient: dense on left, opens on right ── */}
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(108deg, rgba(8,6,20,0.96) 0%, rgba(8,6,20,0.85) 30%, rgba(8,6,20,0.52) 58%, rgba(8,6,20,0.18) 100%)', zIndex: 1, pointerEvents: 'none' }}/>
 
-      {/* Molecular particle canvas — very subtle over video */}
-      <div style={{ position:'absolute', inset:0, zIndex:2, opacity:0.18, pointerEvents:'none' }}>
+      {/* Molecular particle layer */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 2, opacity: 0.14, pointerEvents: 'none' }}>
         <MolecularCanvas />
       </div>
 
-      {/* Bottom fade into StatsBar dark section */}
-      <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'28%', background:'linear-gradient(to bottom, transparent, var(--forest))', zIndex:3, pointerEvents:'none' }}/>
+      {/* Bottom fade into StatsBar */}
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '28%', background: 'linear-gradient(to bottom, transparent, var(--forest))', zIndex: 3, pointerEvents: 'none' }}/>
 
       {/* ── Left-aligned content ── */}
-      <div style={{ position:'relative', zIndex:4, height:'100%', display:'flex', alignItems:'center', padding:isMobile?'0 1.6rem':'0 6.5rem' }}>
-        <div style={{ maxWidth:isMobile?'100%':640, paddingTop:isMobile?'4rem':0 }}>
+      <div style={{ position: 'relative', zIndex: 4, height: '100%', display: 'flex', alignItems: 'center', padding: isMobile ? '0 1.6rem' : '0 6.5rem' }}>
+        <div style={{ maxWidth: isMobile ? '100%' : 640, paddingTop: isMobile ? '4rem' : 0 }}>
 
           <div style={{ ...fade(0.1) }}>
-            <span className="mono" style={{ fontSize:'.58rem', letterSpacing:'.3em', textTransform:'uppercase', color:'rgba(184,114,94,0.85)', display:'block', marginBottom:'2rem' }}>Precision Index Discovery</span>
+            <span className="mono" style={{ fontSize: '.58rem', letterSpacing: '.3em', textTransform: 'uppercase', color: 'rgba(184,114,94,0.85)', display: 'block', marginBottom: '2rem' }}>Precision Index Discovery</span>
           </div>
 
-          {/* DECODE — the hero word */}
           <div style={{ ...fade(0.2) }}>
-            <span style={{ fontFamily:'Inter,system-ui,sans-serif', fontSize:isMobile?'clamp(4rem,18vw,6.5rem)':'clamp(6rem,10vw,12rem)', fontWeight:800, letterSpacing:'.06em', color:'#FFFFFF', lineHeight:.9, display:'block', textShadow:'0 2px 80px rgba(184,114,94,0.18)' }}>DECODE</span>
+            <span style={{ fontFamily: 'Inter,system-ui,sans-serif', fontSize: isMobile ? 'clamp(4rem,18vw,6.5rem)' : 'clamp(6rem,10vw,12rem)', fontWeight: 800, letterSpacing: '.06em', color: '#FFFFFF', lineHeight: .9, display: 'block', textShadow: '0 2px 80px rgba(184,114,94,0.18)' }}>DECODE</span>
           </div>
 
-          <h1 className="serif" style={{
-            ...fade(0.3),
-            fontSize:isMobile?'clamp(1.5rem,5.5vw,2.2rem)':'clamp(1.8rem,2.8vw,3.4rem)',
-            fontWeight:300, lineHeight:1.12, color:'rgba(255,255,255,0.78)',
-            margin:isMobile?'.8rem 0 1.6rem':'1rem 0 2rem',
-          }}>
-            the molecular landscape of{' '}<em style={{ fontStyle:'italic', color:'#B8725E' }}>disease.</em>
+          <h1 className="serif" style={{ ...fade(0.3), fontSize: isMobile ? 'clamp(1.5rem,5.5vw,2.2rem)' : 'clamp(1.8rem,2.8vw,3.4rem)', fontWeight: 300, lineHeight: 1.12, color: 'rgba(255,255,255,0.78)', margin: isMobile ? '.8rem 0 1.6rem' : '1rem 0 2rem' }}>
+            the molecular landscape of{' '}<em style={{ fontStyle: 'italic', color: '#B8725E' }}>disease.</em>
           </h1>
 
-          <p style={{ ...fade(0.42), fontSize:isMobile?'.86rem':'.96rem', color:'rgba(255,255,255,0.4)', lineHeight:1.9, maxWidth:460, fontWeight:300, marginBottom:'2.8rem' }}>
+          <p style={{ ...fade(0.42), fontSize: isMobile ? '.86rem' : '.96rem', color: 'rgba(255,255,255,0.4)', lineHeight: 1.9, maxWidth: 460, fontWeight: 300, marginBottom: '2.8rem' }}>
             Next-generation protein biomarker discovery powered by proximity extension assay technology — simultaneously quantifying thousands of proteins with femtomolar sensitivity.
           </p>
 
-          <div style={{ ...fade(0.54), display:'flex', gap:'.9rem', flexWrap:'wrap' }}>
+          <div style={{ ...fade(0.54), display: 'flex', gap: '.9rem', flexWrap: 'wrap' }}>
             <a href="#indices"
-              style={{ padding:'.9rem 2.2rem', borderRadius:100, background:'#B8725E', color:'#fff', fontSize:'.86rem', fontWeight:500, textDecoration:'none', transition:'all .28s ease', boxShadow:'0 4px 32px rgba(184,114,94,0.45)', letterSpacing:'.02em', display:'inline-flex', alignItems:'center', gap:'.5rem' }}
-              onMouseEnter={e=>{ const el=e.currentTarget as HTMLElement; el.style.background='#9E5D4C'; el.style.transform='translateY(-2px)'; el.style.boxShadow='0 8px 44px rgba(184,114,94,0.6)' }}
-              onMouseLeave={e=>{ const el=e.currentTarget as HTMLElement; el.style.background='#B8725E'; el.style.transform='none'; el.style.boxShadow='0 4px 32px rgba(184,114,94,0.45)' }}
+              style={{ padding: '.9rem 2.2rem', borderRadius: 100, background: '#B8725E', color: '#fff', fontSize: '.86rem', fontWeight: 500, textDecoration: 'none', transition: 'all .28s ease', boxShadow: '0 4px 32px rgba(184,114,94,0.45)', letterSpacing: '.02em', display: 'inline-flex', alignItems: 'center', gap: '.5rem' }}
+              onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = '#9E5D4C'; el.style.transform = 'translateY(-2px)'; el.style.boxShadow = '0 8px 44px rgba(184,114,94,0.6)' }}
+              onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = '#B8725E'; el.style.transform = 'none'; el.style.boxShadow = '0 4px 32px rgba(184,114,94,0.45)' }}
             >Explore the platform <span>→</span></a>
             <a href="#about"
-              style={{ padding:'.9rem 2.2rem', borderRadius:100, background:'rgba(255,255,255,0.05)', color:'rgba(255,255,255,0.65)', border:'1px solid rgba(255,255,255,0.18)', fontSize:'.86rem', fontWeight:300, textDecoration:'none', transition:'all .28s ease', backdropFilter:'blur(10px)' }}
-              onMouseEnter={e=>{ const el=e.currentTarget as HTMLElement; el.style.borderColor='rgba(255,255,255,0.45)'; el.style.color='#fff' }}
-              onMouseLeave={e=>{ const el=e.currentTarget as HTMLElement; el.style.borderColor='rgba(255,255,255,0.18)'; el.style.color='rgba(255,255,255,0.65)' }}
+              style={{ padding: '.9rem 2.2rem', borderRadius: 100, background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.65)', border: '1px solid rgba(255,255,255,0.18)', fontSize: '.86rem', fontWeight: 300, textDecoration: 'none', transition: 'all .28s ease', backdropFilter: 'blur(10px)' }}
+              onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = 'rgba(255,255,255,0.45)'; el.style.color = '#fff' }}
+              onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = 'rgba(255,255,255,0.18)'; el.style.color = 'rgba(255,255,255,0.65)' }}
             >For Clinicians</a>
           </div>
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      {!isMobile&&(
-        <div style={{ position:'absolute', bottom:'3rem', left:'6.5rem', zIndex:5, display:'flex', alignItems:'center', gap:'.8rem', opacity:loaded?0.5:0, transition:'opacity 1.5s 1.4s' }}>
-          <div style={{ width:20, height:32, borderRadius:10, border:'1px solid rgba(255,255,255,0.22)', display:'flex', justifyContent:'center', paddingTop:5 }}>
-            <div style={{ width:2, height:8, background:'rgba(255,255,255,0.55)', borderRadius:1, animation:'scroll-pulse 2s ease-in-out infinite' }}/>
-          </div>
-          <span className="mono" style={{ fontSize:'.5rem', letterSpacing:'.22em', textTransform:'uppercase', color:'rgba(255,255,255,0.32)' }}>Scroll to explore</span>
+      {/* ── Slide location + dot navigation ── */}
+      <div style={{ position: 'absolute', bottom: '3rem', right: isMobile ? '1.6rem' : '3rem', zIndex: 5, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '.75rem', opacity: loaded ? 1 : 0, transition: 'opacity 1.5s 1.2s' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '.55rem', padding: '.45rem .88rem', background: 'rgba(8,6,20,0.55)', backdropFilter: 'blur(16px)', borderRadius: 100, border: '1px solid rgba(255,255,255,0.08)' }}>
+          <div style={{ width: 5, height: 5, borderRadius: '50%', background: 'rgba(184,114,94,0.85)', boxShadow: '0 0 8px rgba(184,114,94,0.55)', flexShrink: 0 }}/>
+          <span key={slide} className="mono" style={{ fontSize: '.52rem', letterSpacing: '.14em', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', animation: 'spore-rise .45s ease' }}>
+            {HERO_SLIDES[slide].location}
+          </span>
         </div>
-      )}
+        <div style={{ display: 'flex', gap: '.4rem', alignItems: 'center', justifyContent: 'flex-end' }}>
+          {HERO_SLIDES.map((_, i) => (
+            <button key={i} onClick={() => setSlide(i)} aria-label={`Slide ${i + 1}`}
+              style={{ width: i === slide ? 28 : 7, height: 7, borderRadius: 4, border: 'none', cursor: 'pointer', background: i === slide ? 'rgba(184,114,94,0.9)' : 'rgba(255,255,255,0.28)', transition: 'all .45s cubic-bezier(.16,1,.3,1)', padding: 0 }}
+            />
+          ))}
+        </div>
+      </div>
 
-      {/* Interact label — top right */}
-      {!isMobile&&(
-        <div style={{ position:'absolute', top:'50%', right:'3rem', zIndex:5, transform:'translateY(-50%)', display:'flex', alignItems:'center', gap:'.65rem', opacity:loaded?0.75:0, transition:'opacity 1.5s 1.2s' }}>
-          <div style={{ width:26, height:26, borderRadius:'50%', border:'1px solid rgba(184,114,94,0.5)', background:'rgba(8,6,20,0.45)', backdropFilter:'blur(10px)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-            <div style={{ width:7, height:7, borderRadius:'50%', background:'rgba(184,114,94,0.9)', boxShadow:'0 0 12px rgba(184,114,94,0.7)' }}/>
+      {/* ── Scroll indicator ── */}
+      {!isMobile && (
+        <div style={{ position: 'absolute', bottom: '3rem', left: '6.5rem', zIndex: 5, display: 'flex', alignItems: 'center', gap: '.8rem', opacity: loaded ? 0.5 : 0, transition: 'opacity 1.5s 1.4s' }}>
+          <div style={{ width: 20, height: 32, borderRadius: 10, border: '1px solid rgba(255,255,255,0.22)', display: 'flex', justifyContent: 'center', paddingTop: 5 }}>
+            <div style={{ width: 2, height: 8, background: 'rgba(255,255,255,0.55)', borderRadius: 1, animation: 'scroll-pulse 2s ease-in-out infinite' }}/>
           </div>
-          <div>
-            <div style={{ fontSize:'.7rem', color:'rgba(255,255,255,0.7)', fontWeight:400, lineHeight:1.3 }}>Interact</div>
-            <div style={{ fontSize:'.63rem', color:'rgba(255,255,255,0.32)', lineHeight:1.3 }}>with the molecular world</div>
-          </div>
+          <span className="mono" style={{ fontSize: '.5rem', letterSpacing: '.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.32)' }}>Scroll to explore</span>
         </div>
       )}
     </section>
@@ -392,8 +409,8 @@ function BiologicalComplexity() {
         {/* Image side — biology microscopy */}
         <div style={{ position:'relative', minHeight:isMobile?280:620, overflow:'hidden' }}>
           <img
-            src="https://images.pexels.com/photos/954583/pexels-photo-954583.jpeg?auto=compress&cs=tinysrgb&w=1260"
-            alt="Biology microscopy"
+            src="/bg.jpeg"
+            alt="DNA molecular structure"
             style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', filter:'saturate(0.7) brightness(0.95)', opacity:vis?1:0, transform:vis?'scale(1)':'scale(1.06)', transition:'opacity 1.1s .2s, transform 1.4s .2s cubic-bezier(.16,1,.3,1)' }}
             onError={e=>{ (e.currentTarget as HTMLImageElement).style.display='none' }}
           />
@@ -738,8 +755,8 @@ function About() {
         {/* Lab image */}
         <div style={{ position:'relative', minHeight:isMobile?240:600, overflow:'hidden', order:isMobile?-1:0 }}>
           <img
-            src="https://images.pexels.com/photos/2280571/pexels-photo-2280571.jpeg?auto=compress&cs=tinysrgb&w=1260"
-            alt="Laboratory research"
+            src="/wallpaper.jpg"
+            alt="Precision Index Discovery — research facility"
             style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', filter:'saturate(0.6) brightness(0.75)', opacity:vis?1:0, transform:vis?'scale(1)':'scale(1.05)', transition:'opacity 1.1s .15s, transform 1.5s .15s cubic-bezier(.16,1,.3,1)' }}
             onError={e=>{(e.currentTarget as HTMLImageElement).style.display='none'}}
           />
