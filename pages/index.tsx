@@ -290,16 +290,11 @@ function Hero() {
           </p>
 
           <div style={{ ...fade(0.54), display: 'flex', gap: '.9rem', flexWrap: 'wrap' }}>
-            <a href="#indices"
+            <a href="#technology"
               style={{ padding: '.9rem 2.2rem', borderRadius: 100, background: '#B8725E', color: '#fff', fontSize: '.86rem', fontWeight: 500, textDecoration: 'none', transition: 'all .28s ease', boxShadow: '0 4px 32px rgba(184,114,94,0.45)', letterSpacing: '.02em', display: 'inline-flex', alignItems: 'center', gap: '.5rem' }}
               onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = '#9E5D4C'; el.style.transform = 'translateY(-2px)'; el.style.boxShadow = '0 8px 44px rgba(184,114,94,0.6)' }}
               onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = '#B8725E'; el.style.transform = 'none'; el.style.boxShadow = '0 4px 32px rgba(184,114,94,0.45)' }}
-            >Explore the platform <span>→</span></a>
-            <a href="#about"
-              style={{ padding: '.9rem 2.2rem', borderRadius: 100, background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.65)', border: '1px solid rgba(255,255,255,0.18)', fontSize: '.86rem', fontWeight: 300, textDecoration: 'none', transition: 'all .28s ease', backdropFilter: 'blur(10px)' }}
-              onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = 'rgba(255,255,255,0.45)'; el.style.color = '#fff' }}
-              onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = 'rgba(255,255,255,0.18)'; el.style.color = 'rgba(255,255,255,0.65)' }}
-            >For Clinicians</a>
+            >Explore our platforms <span>→</span></a>
           </div>
         </div>
       </div>
@@ -433,7 +428,7 @@ const PEA_STEPS = [
   {
     num:'01', title:'Biological Sample', col:'#476B57',
     img:'https://images.pexels.com/photos/4226219/pexels-photo-4226219.jpeg?auto=compress&cs=tinysrgb&w=1260',
-    body:'As little as 1 µL of plasma, serum, or cerebrospinal fluid contains thousands of target proteins for simultaneous measurement.',
+    body:'As little as 🩸 1 µL of blood plasma or serum contains thousands of target proteins for simultaneous measurement — no invasive sampling required.',
   },
   {
     num:'02', title:'Target Recognition', col:'#B8725E',
@@ -897,7 +892,7 @@ function Science() {
 // ── CONTACT ──────────────────────────────────────────────────────────────────
 
 function Contact() {
-  const [form,setForm]=useState({ name:'', email:'', type:'Biomarker Discovery', message:'' })
+  const [form,setForm]=useState({ name:'', email:'', type:'Academic Institutions', message:'' })
   const [sent,setSent]=useState(false)
   const [loading,setLoading]=useState(false)
   const { ref, vis } = useVisible(0.1)
@@ -926,21 +921,25 @@ function Contact() {
             Take the{' '}<em style={{ fontStyle:'italic', color:'#B8725E' }}>next step</em>
           </h2>
           <p style={{ fontSize:isMobile?'.9rem':'.98rem', color:'rgba(28,40,32,0.48)', maxWidth:520, margin:'0 auto', lineHeight:1.88, fontWeight:300 }}>
-            Patients begin with a question. Clinicians begin with a panel. Both paths lead to the same architecture — interpreted from your perspective.
+            Academic institutions, hospitals, and clinics — reach out to discuss a service request for any of our Olink platforms: Target 48, Target 96, Reveal, or Explore HT.
           </p>
         </div>
 
         <div style={{ display:'grid', gridTemplateColumns:isMobile?'1fr':'1fr 1.2fr', gap:isMobile?'3.5rem':'8rem', opacity:vis?1:0, transition:'opacity .9s .22s' }}>
           <div>
-            {[{label:'Email',val:'info@precisionindex.com'},{label:'Locations',val:'Stockholm · London · Dubai'}].map((item,i)=>(
+            {[
+              {label:'Email',val:'info@precisionindex.com'},
+              {label:'Address',val:'CCK · Karolinska University Hospital · 171 76 Solna, Sweden'},
+              {label:'Also in',val:'London · Dubai'},
+            ].map((item,i)=>(
               <div key={i} style={{ display:'flex', gap:'1.2rem', alignItems:'baseline', marginBottom:'.85rem' }}>
                 <span className="mono" style={{ fontSize:'.58rem', letterSpacing:'.16em', textTransform:'uppercase', color:'rgba(28,40,32,0.32)', width:68, flexShrink:0 }}>{item.label}</span>
                 <span style={{ fontSize:'.9rem', color:'rgba(28,40,32,0.55)', wordBreak:'break-word' }}>{item.val}</span>
               </div>
             ))}
             <div style={{ marginTop:'2rem', display:'flex', flexDirection:'column', gap:'.6rem' }}>
-              {['For Patients','For Clinicians','For Researchers','Discuss a partnership'].map((action,i)=>(
-                <a key={i} href={i===0?'#indices':i===1?'#about':i===2?'#applications':'#contact'}
+              {['Academic Institutions','Clinic Partnership','Patient Enquiry'].map((action,i)=>(
+                <a key={i} href="#contact"
                   style={{ padding:'.78rem 1.1rem', borderRadius:10, border:'1px solid rgba(43,77,63,0.1)', background:'transparent', color:'rgba(28,40,32,0.5)', fontSize:'.84rem', textDecoration:'none', display:'flex', justifyContent:'space-between', alignItems:'center', transition:'all .24s ease' }}
                   onMouseEnter={e=>{const el=e.currentTarget as HTMLElement; el.style.background='rgba(43,77,63,0.06)'; el.style.borderColor='rgba(43,77,63,0.22)'; el.style.color='#2B4D3F'}}
                   onMouseLeave={e=>{const el=e.currentTarget as HTMLElement; el.style.background='transparent'; el.style.borderColor='rgba(43,77,63,0.1)'; el.style.color='rgba(28,40,32,0.5)'}}
@@ -968,7 +967,7 @@ function Contact() {
                 <div>
                   <label style={{ display:'block', fontSize:'.6rem', letterSpacing:'.2em', textTransform:'uppercase', color:'rgba(28,40,32,0.35)', marginBottom:'.4rem' }}>Service of Interest</label>
                   <select value={form.type} onChange={e=>setForm(f=>({...f,type:e.target.value}))} style={{...inp,cursor:'pointer',background:'transparent'}}>
-                    {['Patient Enquiry','Clinic Partnership','The Seven Indices','Fertility Index','Organ Index','Vitality Index','Cancer Index','Genomics Index','General Enquiry'].map(o=><option key={o} style={{background:'#F7F5EF'}}>{o}</option>)}
+                    {['Academic Institutions','Clinic Partnership','Patient Enquiry'].map(o=><option key={o} style={{background:'#F7F5EF'}}>{o}</option>)}
                   </select>
                 </div>
                 <div>
@@ -996,9 +995,9 @@ function Contact() {
 function Footer() {
   const isMobile=useIsMobile(700)
   const cols=[
-    { title:'Company', links:[{l:'About',h:'#about'},{l:'Technology',h:'#technology'},{l:'Contact',h:'#contact'}] },
-    { title:'The Indices', links:[{l:'Fertility Index',h:'#indices'},{l:'Organ Index',h:'#indices'},{l:'Vitality Index',h:'#indices'},{l:'Cancer Index',h:'#indices'}] },
-    { title:'Patients & Clinics', links:[{l:'For Patients',h:'#indices'},{l:'For Clinicians',h:'#about'},{l:'Partner Clinics',h:'#contact'}] },
+    { title:'Company', links:[{l:'About',h:'#about'},{l:'Our Science',h:'#science'},{l:'Contact',h:'#contact'}] },
+    { title:'Platforms', links:[{l:'Target 48',h:'#technology'},{l:'Target 96',h:'#technology'},{l:'Reveal',h:'#technology'},{l:'Explore HT',h:'#technology'}] },
+    { title:'Work with us', links:[{l:'Academic Institutions',h:'#contact'},{l:'Clinic Partnership',h:'#contact'},{l:'Patient Enquiry',h:'#contact'}] },
   ]
   return (
     <footer style={{ background:'var(--forest)', padding:isMobile?'3.5rem 1.4rem 2rem':'5.5rem 6rem 3rem', borderTop:'1px solid rgba(247,245,239,0.07)' }}>
@@ -1008,7 +1007,7 @@ function Footer() {
             <div style={{ marginBottom:'1rem' }}><LogoMark size='1.05rem' onDark={true} /></div>
             <div className="mono" style={{ fontSize:'.5rem', letterSpacing:'.28em', textTransform:'uppercase', color:'rgba(247,245,239,0.25)', marginBottom:'1.3rem' }}>Precision 360 Biosystem · Clinical Proteomics</div>
             <p style={{ color:'rgba(247,245,239,0.3)', fontSize:'.83rem', lineHeight:1.85, maxWidth:290 }}>
-              A new architecture for precision medicine. Powered by Olink proteomics, Illumina sequencing, and methylation arrays. Stockholm · London · Dubai.
+              A new architecture for precision medicine. Powered by Olink proteomics, Illumina sequencing, and methylation arrays. CCK · Karolinska University Hospital, Stockholm · London · Dubai.
             </p>
             <div style={{ marginTop:'1.5rem', padding:'1rem 1.2rem', background:'rgba(247,245,239,0.04)', border:'1px solid rgba(247,245,239,0.06)', borderRadius:10 }}>
               <p style={{ fontSize:'.7rem', color:'rgba(247,245,239,0.22)', lineHeight:1.72 }}>Olink® is a trademark of Olink Proteomics AB. Precision Index Discovery is not affiliated with Olink Proteomics AB.</p>
