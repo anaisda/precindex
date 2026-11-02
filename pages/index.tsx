@@ -427,7 +427,7 @@ function BiologicalComplexity() {
 const PEA_STEPS = [
   {
     num:'01', title:'Biological Sample', col:'#476B57',
-    img:'https://images.pexels.com/photos/4226219/pexels-photo-4226219.jpeg?auto=compress&cs=tinysrgb&w=1260',
+    img:'https://images.pexels.com/photos/3825586/pexels-photo-3825586.jpeg?auto=compress&cs=tinysrgb&w=1260',
     body:'As little as 🩸 1 µL of blood plasma or serum contains thousands of target proteins for simultaneous measurement — no invasive sampling required.',
   },
   {
@@ -930,7 +930,6 @@ function Contact() {
             {[
               {label:'Email',val:'info@precisionindex.com'},
               {label:'Address',val:'CCK · Karolinska University Hospital · 171 76 Solna, Sweden'},
-              {label:'Also in',val:'London · Dubai'},
             ].map((item,i)=>(
               <div key={i} style={{ display:'flex', gap:'1.2rem', alignItems:'baseline', marginBottom:'.85rem' }}>
                 <span className="mono" style={{ fontSize:'.58rem', letterSpacing:'.16em', textTransform:'uppercase', color:'rgba(28,40,32,0.32)', width:68, flexShrink:0 }}>{item.label}</span>
@@ -1007,7 +1006,7 @@ function Footer() {
             <div style={{ marginBottom:'1rem' }}><LogoMark size='1.05rem' onDark={true} /></div>
             <div className="mono" style={{ fontSize:'.5rem', letterSpacing:'.28em', textTransform:'uppercase', color:'rgba(247,245,239,0.25)', marginBottom:'1.3rem' }}>Precision 360 Biosystem · Clinical Proteomics</div>
             <p style={{ color:'rgba(247,245,239,0.3)', fontSize:'.83rem', lineHeight:1.85, maxWidth:290 }}>
-              A new architecture for precision medicine. Powered by Olink proteomics, Illumina sequencing, and methylation arrays. CCK · Karolinska University Hospital, Stockholm · London · Dubai.
+              A new architecture for precision medicine. Powered by Olink proteomics, Illumina sequencing, and methylation arrays. Based at CCK · Karolinska University Hospital, Stockholm.
             </p>
             <div style={{ marginTop:'1.5rem', padding:'1rem 1.2rem', background:'rgba(247,245,239,0.04)', border:'1px solid rgba(247,245,239,0.06)', borderRadius:10 }}>
               <p style={{ fontSize:'.7rem', color:'rgba(247,245,239,0.22)', lineHeight:1.72 }}>Olink® is a trademark of Olink Proteomics AB. Precision Index Discovery is not affiliated with Olink Proteomics AB.</p>
