@@ -336,7 +336,7 @@ function StatsBar() {
   const isMobile = useIsMobile(600)
   const stats=[
     { num:'7',       label:'Clinical Indices',      sub:'from one finger-prick' },
-    { num:'3',       label:'Global Facilities',     sub:'Stockholm · London · Dubai' },
+    { num:'1',       label:'Facility',              sub:'CCK · Karolinska, Stockholm' },
     { num:'4,000+',  label:'Peer-Reviewed Studies', sub:'Olink PEA validated' },
     { num:'1',       label:'Sample. All Indices.',  sub:'cryogenically banked' },
   ]
@@ -772,10 +772,10 @@ function About() {
             </p>
           </div>
           <p style={{ ...tr(0.28), color:'rgba(247,245,239,0.48)', lineHeight:1.9, fontSize:isMobile?'.88rem':'.94rem', fontWeight:300, marginBottom:'1.2rem' }}>
-            Based at Karolinska Institutet in Stockholm — one of Europe's foremost environments for translational biomedical research — Precision Index Discovery validates all indices against matched venous blood via the Karolinska Bridging Protocol. Samples are processed across our Stockholm, London, and Dubai facilities.
+            Based at Karolinska Institutet in Stockholm — one of Europe's foremost environments for translational biomedical research — Precision Index Discovery validates all indices against matched venous blood via the Karolinska Bridging Protocol. Samples are processed at our facility at CCK, Karolinska University Hospital, Stockholm.
           </p>
           <div style={{ ...tr(0.36), display:'flex', flexDirection:'column', gap:'.7rem' }}>
-            {[{title:'For Patients', body:'Connect with a certified partner clinic to access any of the seven indices. Begin with a single question; the architecture handles the rest.'},{title:'For Clinicians', body:'Access interpretation guides, clinical decision frameworks, and index reference sheets. Partner with us to offer Precision 360 in your clinic.'},{title:'For Researchers', body:'Institutional access for academic cohort studies, biobank collaboration, and Explore HT large-scale discovery. Academic pricing available.'},{title:'Our Locations', body:'Karolinska Institutet, Stockholm · Dubai Healthcare City, UAE · London, UK'}].map((item,i)=>(
+            {[{title:'For Patients', body:'Connect with a certified partner clinic to access any of the seven indices. Begin with a single question; the architecture handles the rest.'},{title:'For Clinicians', body:'Access interpretation guides, clinical decision frameworks, and index reference sheets. Partner with us to offer Precision 360 in your clinic.'},{title:'For Researchers', body:'Institutional access for academic cohort studies, biobank collaboration, and Explore HT large-scale discovery. Academic pricing available.'},{title:'Our Location', body:'Cancercentrum Karolinska (CCK), Karolinska University Hospital, 171 76 Solna, Stockholm, Sweden'}].map((item,i)=>(
               <div key={i} style={{ display:'flex', gap:'1rem', padding:'.9rem 1rem', borderRadius:10, background:'rgba(247,245,239,0.05)', border:'1px solid rgba(247,245,239,0.07)' }}>
                 <div style={{ width:3, background:'#B8725E', borderRadius:2, flexShrink:0 }}/>
                 <div>
