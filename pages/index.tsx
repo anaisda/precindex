@@ -428,7 +428,7 @@ const PEA_STEPS = [
   {
     num:'01', title:'Biological Sample', col:'#476B57',
     img:'https://images.pexels.com/photos/3825586/pexels-photo-3825586.jpeg?auto=compress&cs=tinysrgb&w=1260',
-    body:'As little as 🩸 1 µL of blood plasma or serum contains thousands of target proteins for simultaneous measurement — no invasive sampling required.',
+    body:'Just 🩸 1–4 µL of blood plasma or serum — depending on the platform — contains thousands of target proteins for simultaneous measurement. No invasive sampling required.',
   },
   {
     num:'02', title:'Target Recognition', col:'#B8725E',
