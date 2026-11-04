@@ -448,7 +448,7 @@ const PEA_STEPS = [
   {
     num:'05', title:'Multiplexed Profiling', col:'#B8725E',
     img:'https://images.pexels.com/photos/2280571/pexels-photo-2280571.jpeg?auto=compress&cs=tinysrgb&w=1260',
-    body:'Thousands of these reactions run simultaneously in a single well, yielding quantitative measurements of up to 5,784 proteins per sample.',
+    body:'Thousands of these reactions run simultaneously in a single well, yielding quantitative measurements of up to 5,400+ proteins per sample.',
   },
   {
     num:'06', title:'Biological Insight', col:'#476B57',
@@ -552,14 +552,14 @@ function PEATechnology() {
 const OLINK_PLATFORMS = [
   {
     name: 'Target 48',
-    count: '48',
+    count: 'up to 45',
     tag: 'CLINICAL PANELS',
     col: '#B8725E',
     bg: 'rgba(184,114,94,0.07)',
     border: 'rgba(184,114,94,0.2)',
     headline: 'Focused clinical validation',
-    body: 'Pre-defined or fully custom panels covering up to 48 proteins from 1 µL of plasma or serum. Optimised for high-throughput clinical biomarker validation and targeted pathway studies.',
-    specs: ['1 µL sample required', 'Custom or pre-defined', 'High-throughput ready'],
+    body: 'Pre-defined panels of up to 45 verified and carefully selected biomarkers per panel, targeting cytokine signalling and inflammatory processes. Runs from 1 µL of plasma or serum.',
+    specs: ['1 µL plasma or serum', 'Pre-defined panels', 'Absolute / Relative quantification'],
   },
   {
     name: 'Target 96',
@@ -570,29 +570,29 @@ const OLINK_PLATFORMS = [
     border: 'rgba(71,107,87,0.2)',
     headline: "The world's most published proteomics platform",
     body: 'Ninety-two proteins per panel across oncology, cardiovascular, inflammatory, and neurological themes — with over 4,000 peer-reviewed publications establishing its clinical validity.',
-    specs: ['92 proteins per panel', '15+ validated panels', '1 µL plasma or serum'],
+    specs: ['92 proteins per panel', '11 validated panels', '1 µL plasma or serum', 'Relative quantification'],
   },
   {
     name: 'Reveal',
-    count: '1,536',
+    count: '>1,000',
     tag: 'BROAD DISCOVERY',
     col: '#2B4D3F',
     bg: 'rgba(43,77,63,0.07)',
     border: 'rgba(43,77,63,0.2)',
     headline: 'Hypothesis-free pathway mapping',
-    body: 'Simultaneously profile 1,536 proteins in a single run — without prior biological hypothesis. Purpose-built for systems biology, pathway discovery, and exploratory research.',
-    specs: ['1,536 proteins', 'Single 1 µL sample', 'No prior hypothesis needed'],
+    body: 'Profile over 1,000 protein biomarkers for broad proteome coverage and deep profiling of inflammation and disease processes — without any prior biological hypothesis.',
+    specs: ['>1,000 proteins', '4 µL plasma or serum', 'No prior hypothesis needed', 'Relative quantification'],
   },
   {
     name: 'Explore HT',
-    count: '5,784',
+    count: '5,400+',
     tag: 'PROTEOME SCALE',
     col: '#C4955A',
     bg: 'rgba(196,149,90,0.08)',
     border: 'rgba(196,149,90,0.22)',
     headline: 'Full proteome discovery at biobank scale',
-    body: 'The widest multiplexing available — up to 5,784 proteins from a single sample. Validated at Karolinska Institutet for use in large-scale longitudinal cohorts and translational discovery programmes.',
-    specs: ['5,784 proteins', 'Biobank & cohort ready', 'Karolinska validated'],
+    body: 'The widest multiplexing available — over 5,400 proteins measured with proven specificity from 2 µL of plasma or serum. Validated at Karolinska Institutet for large-scale longitudinal cohorts and translational discovery.',
+    specs: ['5,400+ proteins', '2 µL plasma or serum', 'Biobank & cohort ready', 'Relative quantification'],
   },
 ]
 
